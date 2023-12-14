@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from premier_league_api import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("add-managers/", views.add_managers)
 ]

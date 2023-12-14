@@ -1,8 +1,5 @@
 from django.contrib import admin
-from .models import Comments
+from .models import Teams, Managers
 
-# admin.site.register(Comments)
-# admin.site.register(Projects)
-# admin.site.register(Experience)
-# admin.site.register(Contact)
-# admin.site.register(Route)
+admin.site.register(Teams)
+admin.site.register(Managers)

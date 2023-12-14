@@ -1,0 +1,27 @@
+from django.http import JsonResponse, HttpResponse
+from .models import Teams, Managers
+from .serializers import TeamsSerializer, ManagersSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+import requests, json, datetime
+import premier_league_api.constants as CONSTANTS
+from bs4 import BeautifulSoup
+
+@api_view(['POST'])
+def add_managers(request):
+
+    if request.method == 'POST':
+        response = requests.get("https://www.transfermarkt.us/premier-league/trainer/pokalwettbewerb/GB1", headers={"User-Agent":"Mozilla/5.0"})
+        soup = BeautifulSoup(response.content, 'html.parser').find('table', {'class':'items'}).find_all('tr')[1:]
+        all_managers = {}
+        # Split manager information
+        for manager in soup:
+            manager_name = manager.get_text(separator = "|").split('|')[1]
+            manager_nationality = manager.find( 'img', {'class': 'flaggenrahmen'})['title']
+            manager_team = manager.find( 'img', {'class': 'tiny_wappen'})['title']
+            all_managers[manager_name] = manager.get_text(separator = "|").split('|')[2:] + [ CONSTANTS.TEAMS[manager_team], manager_nationality]
+        for manager, manager_info in all_managers.items():
+            manager_info[2] = None if manager_info[2] == '?' else manager_info[2]
+            manager_name = manager.split(" ", 1)
+            cur_manager = Managers.objects.create(first_name=manager_name[0], last_name=manager_name[1], age=manager_info[0], nationality=manager_info[5], team_name=Teams.objects.get(name=manager_info[4]), contract_expiry=manager_info[2], created_at=datetime.datetime.now(), updated_at=datetime.datetime.now())
