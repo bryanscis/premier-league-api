@@ -1,4 +1,5 @@
 from django.http import JsonResponse, HttpResponse
+from django.db import IntegrityError
 from .models import Teams, Managers
 from .serializers import TeamsSerializer, ManagersSerializer
 from rest_framework.decorators import api_view
@@ -24,4 +25,11 @@ def add_managers(request):
         for manager, manager_info in all_managers.items():
             manager_info[2] = None if manager_info[2] == '?' else manager_info[2]
             manager_name = manager.split(" ", 1)
-            cur_manager = Managers.objects.create(first_name=manager_name[0], last_name=manager_name[1], age=manager_info[0], nationality=manager_info[5], team_name=Teams.objects.get(name=manager_info[4]), contract_expiry=manager_info[2], created_at=datetime.datetime.now(), updated_at=datetime.datetime.now())
+            serializer = ManagersSerializer(data={'first_name': manager_name[0], 'last_name':manager_name[1], 'age':manager_info[0], 'nationality': manager_info[5], 'team_name':manager_info[4], 'contract_expiry': manager_info[2], 'created_at': datetime.datetime.now(), 'updated_at': datetime.datetime.now()})
+            # Save data if no errors
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+            except IntegrityError:
+                return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
