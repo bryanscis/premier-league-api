@@ -21,3 +21,17 @@ class Managers(models.Model):
 
     def __str__(self):
         return f'{self.first_name} | {self.last_name} | {self.age} | {self.nationality} | {self.team_name} | {self.contract_expiry} '
+    
+class Fixtures(models.Model):
+    game_week = models.IntegerField()
+    date_time = models.DateTimeField()
+    stadium = models.CharField(max_length=50)
+    home_team = models.ForeignKey("Teams", on_delete=models.CASCADE, related_name='home_team')
+    away_team = models.ForeignKey("Teams", on_delete=models.CASCADE, related_name='away_team')
+    home_score = models.IntegerField(null=True)
+    away_score = models.IntegerField(null=True)
+    class Meta:
+        unique_together = ["game_week", "home_team", "away_team"]
+
+    def __str__(self):
+        return f'Week {self.game_week}: {self.home_team} {self.home_score} - {self.away_score} {self.away_team} at {self.stadium} on {self.date_time}'
