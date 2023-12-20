@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Teams, Managers
+from .models import Teams, Managers, Fixtures
 
 class TeamsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,5 +13,5 @@ class ManagersSerializer(serializers.ModelSerializer):
 
 class FixturesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Managers
-        fields = ['id', 'game_week', 'date_time', 'stadium', 'home_team', 'away_team', 'home_score', 'away_score']
+        model = Fixtures
+        fields = ['id', 'game_week', 'date_time', 'stadium', 'home_team', 'away_team', 'home_score', 'away_score', 'created_at', 'updated_at']

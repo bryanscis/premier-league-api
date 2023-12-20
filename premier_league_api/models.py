@@ -17,7 +17,7 @@ class Managers(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     class Meta:
-        unique_together = ["first_name", "last_name", "nationality"]
+        unique_together = [("first_name", "last_name", "nationality")]
 
     def __str__(self):
         return f'{self.first_name} | {self.last_name} | {self.age} | {self.nationality} | {self.team_name} | {self.contract_expiry} '
@@ -30,8 +30,10 @@ class Fixtures(models.Model):
     away_team = models.ForeignKey("Teams", on_delete=models.CASCADE, related_name='away_team')
     home_score = models.IntegerField(null=True)
     away_score = models.IntegerField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
     class Meta:
-        unique_together = ["game_week", "home_team", "away_team"]
+        unique_together = [("game_week", "home_team", "away_team")]
 
     def __str__(self):
         return f'Week {self.game_week}: {self.home_team} {self.home_score} - {self.away_score} {self.away_team} at {self.stadium} on {self.date_time}'

@@ -20,5 +20,6 @@ from premier_league_api import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("add-managers/", views.add_managers)
+    path("add-managers/", views.add_managers),
+    path("add-fixtures/", views.add_fixtures),
 ]
