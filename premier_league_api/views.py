@@ -1,7 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 from django.db import IntegrityError
-from .models import Teams, Managers
-from .serializers import TeamsSerializer, ManagersSerializer, FixturesSerializer
+from .models import Teams, Managers, Fixtures, Players
+from .serializers import TeamsSerializer, ManagersSerializer, FixturesSerializer, PlayersSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status

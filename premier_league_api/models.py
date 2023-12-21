@@ -37,3 +37,27 @@ class Fixtures(models.Model):
 
     def __str__(self):
         return f'Week {self.game_week}: {self.home_team} {self.home_score} - {self.away_score} {self.away_team} at {self.stadium} on {self.date_time}'
+    
+class Players(models.Model):
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    age = models.IntegerField()
+    nationality = models.CharField(max_length=100)
+    team_name = models.ForeignKey("Teams", on_delete=models.CASCADE)
+    position = models.CharField(max_length=20)
+    minutes_played = models.IntegerField()
+    yellow_cards = models.IntegerField()
+    red_cards = models.IntegerField()
+    goals = models.IntegerField()
+    assists = models.IntegerField()
+    clean_sheets = models.IntegerField()
+    total_apps = models.IntegerField()
+    game_starts = models.IntegerField()
+    sub_apps = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = [("first_name", "last_name", "nationality", "team_name")]
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name} : {self.team_name}'
