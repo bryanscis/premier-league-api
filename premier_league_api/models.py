@@ -40,7 +40,7 @@ class Fixtures(models.Model):
     
 class Players(models.Model):
     first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50, null=False, blank=True)
     age = models.IntegerField()
     nationality = models.CharField(max_length=100)
     team_name = models.ForeignKey("Teams", on_delete=models.CASCADE)

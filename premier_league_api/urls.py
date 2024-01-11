@@ -22,4 +22,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("add-managers/", views.add_managers),
     path("add-fixtures/", views.add_fixtures),
+    path("add-players/", views.add_players),
 ]

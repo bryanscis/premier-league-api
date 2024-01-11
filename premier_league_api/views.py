@@ -50,3 +50,31 @@ def add_fixtures(request):
             except IntegrityError:
                 return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def add_players(request):
+
+    if request.method == 'POST':
+        response = requests.get("https://www.footballcritic.com/json/competition-player-stats.php?uid=68731")
+        json_string = json.loads(json.dumps(response.json(), indent = 4, sort_keys=True))
+        for i, ps in enumerate(json_string[0], 1):
+            serializer = PlayersSerializer()
+            if type(ps) == list:
+                first_name, *last_name = str(ps[2]).split(' ', 1)
+                last_name = last_name[0] if last_name else ''
+                position = str(ps[13]).replace(" ", "").replace("<BR/>", "")
+                age, nationality, team, minutes, yellow, red, goals, assists, c_sheets, apps, starts, sub_apps = int(ps[0]), str(ps[3]), str(ps[8]), int(ps[17]), int(ps[18]), int(ps[19]), int(ps[20]), int(ps[21]), int(ps[22]), int(ps[25]), int(ps[26]), int(ps[27])
+                serializer = PlayersSerializer(data= {'first_name': first_name, 'last_name': last_name, 'age': age, 'nationality': nationality, 'team_name': team, 'position': position, 'minutes_played': minutes, 'yellow_cards':yellow, 'red_cards':red, 'goals': goals, 'assists': assists, 'clean_sheets': c_sheets, 'total_apps': apps, 'game_starts': starts, 'sub_apps':sub_apps})
+            elif type(ps) == dict:
+                first_name, *last_name = str(ps['2']).split(' ', 1)
+                last_name = last_name[0] if last_name else ''
+                position = str(ps['13']).replace(" ", "").replace("<BR/>", "")
+                age, nationality, team, minutes, yellow, red, goals, assists, c_sheets, apps, starts, sub_apps = int(ps['0']), str(ps['3']), str(ps['8']), int(ps['17']), int(ps['18']), int(ps['19']), int(ps['20']), int(ps['21']), int(ps['22']), int(ps['25']), int(ps['26']), int(ps['27'])
+                serializer = PlayersSerializer(data= {'first_name': first_name, 'last_name': last_name, 'age': age, 'nationality': nationality, 'team_name': team, 'position': position, 'minutes_played': minutes, 'yellow_cards':yellow, 'red_cards':red, 'goals': goals, 'assists': assists, 'clean_sheets': c_sheets, 'total_apps': apps, 'game_starts': starts, 'sub_apps':sub_apps})
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+            except IntegrityError:
+                return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
