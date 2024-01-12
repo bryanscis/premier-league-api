@@ -78,3 +78,19 @@ def add_players(request):
             except IntegrityError:
                 return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_teams(request, abb=None):
+
+    if request.method == 'GET':
+        teams, serializer = None, None
+        try:
+            if abb:
+                teams = Teams.objects.get(abb=abb)
+                serializer = TeamsSerializer(teams)
+            else:
+                teams = Teams.objects.all().order_by('name')
+                serializer = TeamsSerializer(teams, many=True)
+            return JsonResponse({'teams': serializer.data}, status=200)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
