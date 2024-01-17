@@ -94,3 +94,23 @@ def get_teams(request, abb=None):
             return JsonResponse({'teams': serializer.data}, status=200)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET'])
+def get_managers(request):
+
+    if request.method == 'GET':
+        last_name, abb = request.GET.get('last_name'),request.GET.get('abb')
+        try:
+            if last_name:
+                managers = Managers.objects.get(last_name=last_name )
+                serializer = ManagersSerializer(managers)
+            elif abb:
+                managers = Managers.objects.get(team_name_id=Teams.objects.get(abb=abb).name)
+                serializer = ManagersSerializer(managers)
+            else:
+                managers = Managers.objects.all().order_by('team_name_id')
+                serializer = ManagersSerializer(managers, many=True)
+            return JsonResponse({'managers': serializer.data}, status=200)
+        except Exception as e:
+            print(e)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
