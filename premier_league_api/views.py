@@ -80,11 +80,12 @@ def add_players(request):
         return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def get_teams(request, abb=None):
+def get_teams(request):
 
     if request.method == 'GET':
-        teams, serializer = None, None
         try:
+            teams, serializer = None, None
+            abb = request.GET.get('abb')
             if abb:
                 teams = Teams.objects.get(abb=abb)
                 serializer = TeamsSerializer(teams)
@@ -101,6 +102,7 @@ def get_managers(request):
     if request.method == 'GET':
         last_name, abb = request.GET.get('last_name'),request.GET.get('abb')
         try:
+            managers, serializer = None, None
             if last_name:
                 managers = Managers.objects.get(last_name=last_name )
                 serializer = ManagersSerializer(managers)
