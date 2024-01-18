@@ -113,6 +113,28 @@ def get_managers(request):
                 managers = Managers.objects.all().order_by('team_name_id')
                 serializer = ManagersSerializer(managers, many=True)
             return JsonResponse({'managers': serializer.data}, status=200)
-        except Exception as e:
-            print(e)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET'])
+def get_fixtures(request):
+
+    if request.method == 'GET':
+        played, abb = request.GET.get('played'), request.GET.get('abb')
+        try:
+            fixtures, serializer = None, None
+            if played:
+                if played == 'False':
+                    fixtures = Fixtures.objects.exclude(home_score__isnull=False, away_score__isnull=False).order_by('date_time')
+                elif played == 'True':
+                    fixtures = Fixtures.objects.exclude(home_score__isnull=True, away_score__isnull=True).order_by('date_time')
+                serializer = FixturesSerializer(fixtures, many=True)
+            elif abb:
+                fixtures = Fixtures.objects.filter(home_team_id=Teams.objects.get(abb=abb).name) | Fixtures.objects.filter(away_team_id=Teams.objects.get(abb=abb).name)
+                serializer = FixturesSerializer(fixtures, many=True)
+            else:
+                fixtures = Fixtures.objects.all().order_by('date_time')
+                serializer = FixturesSerializer(fixtures, many=True)
+            return JsonResponse({'fixtures': serializer.data}, status=200)
+        except:
             return Response(status=status.HTTP_400_BAD_REQUEST)

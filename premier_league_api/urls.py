@@ -24,5 +24,6 @@ urlpatterns = [
     path("add-fixtures/", views.add_fixtures),
     path("add-players/", views.add_players),
     path("teams/", views.get_teams),
-    path("managers/", views.get_managers)
+    path("managers/", views.get_managers),
+    path("fixtures/", views.get_fixtures)
 ]
