@@ -2,16 +2,18 @@ from django.http import JsonResponse, HttpResponse
 from django.db import IntegrityError
 from .models import Teams, Managers, Fixtures, Players
 from .serializers import TeamsSerializer, ManagersSerializer, FixturesSerializer, PlayersSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 import requests, json, datetime
 import premier_league_api.constants as CONSTANTS
 from bs4 import BeautifulSoup
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_managers(request):
-
     if request.method == 'POST':
         response = requests.get("https://www.transfermarkt.us/premier-league/trainer/pokalwettbewerb/GB1", headers={"User-Agent":"Mozilla/5.0"})
         soup = BeautifulSoup(response.content, 'html.parser').find('table', {'class':'items'}).find_all('tr')[1:]
@@ -35,6 +37,7 @@ def add_managers(request):
         return Response(status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_fixtures(request):
 
     if request.method == 'POST':
@@ -53,6 +56,7 @@ def add_fixtures(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_players(request):
 
     if request.method == 'POST':
