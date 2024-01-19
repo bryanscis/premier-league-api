@@ -138,3 +138,20 @@ def get_fixtures(request):
             return JsonResponse({'fixtures': serializer.data}, status=200)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_players(request):
+
+    if request.method == 'GET':
+        last_name = request.GET.get('last_name')
+        try:
+            players, serializer = None, None
+            if last_name:
+                players = Players.objects.filter(last_name=last_name)
+                serializer = PlayersSerializer(players, many=True)
+            else:
+                players = Players.objects.all().order_by('id')
+                serializer = PlayersSerializer(players, many=True)
+            return JsonResponse({'players': serializer.data}, status=200)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
