@@ -24,23 +24,22 @@ def add_managers(request):
         manager_nationality = manager.find( 'img', {'class': 'flaggenrahmen'})['title']
         manager_team = manager.find( 'img', {'class': 'tiny_wappen'})['title']
         all_managers[manager_name] = manager.get_text(separator = "|").split('|')[2:] + [ CONSTANTS.TEAMS[manager_team], manager_nationality]
-    if request.method == 'POST':
         for manager, manager_info in all_managers.items():
             manager_info[2] = None if manager_info[2] == '?' else manager_info[2]
             manager_name = manager.split(" ", 1)
-            serializer = ManagersSerializer(data={'first_name': manager_name[0], 'last_name':manager_name[1], 'age':manager_info[0], 'nationality': manager_info[5], 'team_name':manager_info[4], 'contract_expiry': manager_info[2], 'created_at': timezone.now(), 'updated_at': timezone.now()})
-            # Save data if no errors
-            try:
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-            except IntegrityError:
-                return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_200_OK)
-    elif request.method == 'PUT':
-        for manager, manager_info in all_managers.items():
-            manager_info[2] = None if manager_info[2] == '?' else manager_info[2]
-            manager_name = manager.split(" ", 1)
-            Managers.objects.filter(team_name=manager_info[4]).update(first_name=manager_name[0], last_name=manager_name[1], age=manager_info[0], nationality= manager_info[5], team_name=manager_info[4], contract_expiry= manager_info[2], updated_at=timezone.now())
+            if request.method == 'POST':
+                serializer = ManagersSerializer(data={'first_name': manager_name[0], 'last_name':manager_name[1], 'age':manager_info[0], 'nationality': manager_info[5], 'team_name':manager_info[4], 'contract_expiry': manager_info[2], 'created_at': timezone.now(), 'updated_at': timezone.now()})
+                # Save data if no errors
+                try:
+                    if serializer.is_valid(raise_exception=True):
+                        serializer.save()
+                except IntegrityError:
+                    return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            elif request.method == 'PUT': 
+                try:    
+                    Managers.objects.filter(team_name=manager_info[4]).update(first_name=manager_name[0], last_name=manager_name[1], age=manager_info[0], nationality= manager_info[5], team_name=manager_info[4], contract_expiry= manager_info[2], updated_at=timezone.now())
+                except:
+                    return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
 
 @api_view(['POST', 'PUT'])
