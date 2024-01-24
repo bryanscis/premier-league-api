@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 @api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
 def add_managers(request):
+
     response = requests.get("https://www.transfermarkt.us/premier-league/trainer/pokalwettbewerb/GB1", headers={"User-Agent":"Mozilla/5.0"})
     soup = BeautifulSoup(response.content, 'html.parser').find('table', {'class':'items'}).find_all('tr')[1:]
     all_managers = {}
@@ -27,71 +28,66 @@ def add_managers(request):
         for manager, manager_info in all_managers.items():
             manager_info[2] = None if manager_info[2] == '?' else manager_info[2]
             manager_name = manager.split(" ", 1)
-            if request.method == 'POST':
-                serializer = ManagersSerializer(data={'first_name': manager_name[0], 'last_name':manager_name[1], 'age':manager_info[0], 'nationality': manager_info[5], 'team_name':manager_info[4], 'contract_expiry': manager_info[2], 'created_at': timezone.now(), 'updated_at': timezone.now()})
-                # Save data if no errors
-                try:
+            # Save data if no errors
+            try:
+                if request.method == 'POST':
+                    serializer = ManagersSerializer(data={'first_name': manager_name[0], 'last_name':manager_name[1], 'age':manager_info[0], 'nationality': manager_info[5], 'team_name':manager_info[4], 'contract_expiry': manager_info[2], 'created_at': timezone.now(), 'updated_at': timezone.now()})
                     if serializer.is_valid(raise_exception=True):
                         serializer.save()
-                except IntegrityError:
-                    return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-            elif request.method == 'PUT': 
-                try:    
+                elif request.method == 'PUT':
                     Managers.objects.filter(team_name=manager_info[4]).update(first_name=manager_name[0], last_name=manager_name[1], age=manager_info[0], nationality= manager_info[5], team_name=manager_info[4], contract_expiry= manager_info[2], updated_at=timezone.now())
-                except:
-                    return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            except IntegrityError:
+                return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
 
 @api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
 def add_fixtures(request):
+
     response = requests.get('https://fixturedownload.com/feed/json/epl-2023').json()
     for match in response:
         match['HomeTeam'] = CONSTANTS.TEAMSFIXTURES[match['HomeTeam']]
         match['AwayTeam'] = CONSTANTS.TEAMSFIXTURES[match['AwayTeam']]
         match['DateUtc'] = match['DateUtc'][:-1] + '+00'
-        if request.method == 'POST':
-            serializer = FixturesSerializer(data={'game_week': match['RoundNumber'], 'date_time': match['DateUtc'], 'stadium': match['Location'], 'home_team': match['HomeTeam'], 'away_team': match['AwayTeam'], 'home_score': match['HomeTeamScore'], 'away_score': match['AwayTeamScore'],'created_at': timezone.now(), 'updated_at': timezone.now()})
-            try:
+        try:
+            if request.method == 'POST':
+                serializer = FixturesSerializer(data={'game_week': match['RoundNumber'], 'date_time': match['DateUtc'], 'stadium': match['Location'], 'home_team': match['HomeTeam'], 'away_team': match['AwayTeam'], 'home_score': match['HomeTeamScore'], 'away_score': match['AwayTeamScore'],'created_at': timezone.now(), 'updated_at': timezone.now()})
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
-            except IntegrityError:
-                return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        elif request.method == 'PUT':
-            try:
+            elif request.method == 'PUT':
                 Fixtures.objects.filter(game_week=match['RoundNumber'], home_team=match['HomeTeam'], away_team=match['AwayTeam']).update(date_time= match['DateUtc'], home_score= match['HomeTeamScore'], away_score= match['AwayTeamScore'], updated_at=timezone.now())
-            except:
-                return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     return Response(status=status.HTTP_200_OK)
 
-
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
 def add_players(request):
 
-    if request.method == 'POST':
-        response = requests.get("https://www.footballcritic.com/json/competition-player-stats.php?uid=68731")
-        json_string = json.loads(json.dumps(response.json(), indent = 4, sort_keys=True))
-        for i, ps in enumerate(json_string[0], 1):
-            serializer = PlayersSerializer()
-            if type(ps) == list:
-                first_name, *last_name = str(ps[2]).split(' ', 1)
-                last_name = last_name[0] if last_name else ''
-                position = str(ps[13]).replace(" ", "").replace("<BR/>", "")
-                age, nationality, team, minutes, yellow, red, goals, assists, c_sheets, apps, starts, sub_apps = int(ps[0]), str(ps[3]), str(ps[8]), int(ps[17]), int(ps[18]), int(ps[19]), int(ps[20]), int(ps[21]), int(ps[22]), int(ps[25]), int(ps[26]), int(ps[27])
+    response = requests.get("https://www.footballcritic.com/json/competition-player-stats.php?uid=68731")
+    json_string = json.loads(json.dumps(response.json(), indent = 4, sort_keys=True))
+    for i, ps in enumerate(json_string[0], 1):
+        first_name = last_name = position = age = nationality = team = minutes = yellow = red = goals = assists = c_sheets = apps = starts = sub_apps = None
+        if type(ps) == list:
+            first_name, *last_name = str(ps[2]).split(' ', 1)
+            last_name = last_name[0] if last_name else ''
+            position = str(ps[13]).replace(" ", "").replace("<BR/>", "")
+            age, nationality, team, minutes, yellow, red, goals, assists, c_sheets, apps, starts, sub_apps = int(ps[0]), str(ps[3]), str(ps[8]), int(ps[17]), int(ps[18]), int(ps[19]), int(ps[20]), int(ps[21]), int(ps[22]), int(ps[25]), int(ps[26]), int(ps[27])
+        elif type(ps) == dict:
+            first_name, *last_name = str(ps['2']).split(' ', 1)
+            last_name = last_name[0] if last_name else ''
+            position = str(ps['13']).replace(" ", "").replace("<BR/>", "")
+            age, nationality, team, minutes, yellow, red, goals, assists, c_sheets, apps, starts, sub_apps = int(ps['0']), str(ps['3']), str(ps['8']), int(ps['17']), int(ps['18']), int(ps['19']), int(ps['20']), int(ps['21']), int(ps['22']), int(ps['25']), int(ps['26']), int(ps['27'])
+        try:
+            if request.method == 'POST':
                 serializer = PlayersSerializer(data= {'first_name': first_name, 'last_name': last_name, 'age': age, 'nationality': nationality, 'team_name': team, 'position': position, 'minutes_played': minutes, 'yellow_cards':yellow, 'red_cards':red, 'goals': goals, 'assists': assists, 'clean_sheets': c_sheets, 'total_apps': apps, 'game_starts': starts, 'sub_apps':sub_apps})
-            elif type(ps) == dict:
-                first_name, *last_name = str(ps['2']).split(' ', 1)
-                last_name = last_name[0] if last_name else ''
-                position = str(ps['13']).replace(" ", "").replace("<BR/>", "")
-                age, nationality, team, minutes, yellow, red, goals, assists, c_sheets, apps, starts, sub_apps = int(ps['0']), str(ps['3']), str(ps['8']), int(ps['17']), int(ps['18']), int(ps['19']), int(ps['20']), int(ps['21']), int(ps['22']), int(ps['25']), int(ps['26']), int(ps['27'])
-                serializer = PlayersSerializer(data= {'first_name': first_name, 'last_name': last_name, 'age': age, 'nationality': nationality, 'team_name': team, 'position': position, 'minutes_played': minutes, 'yellow_cards':yellow, 'red_cards':red, 'goals': goals, 'assists': assists, 'clean_sheets': c_sheets, 'total_apps': apps, 'game_starts': starts, 'sub_apps':sub_apps})
-            try:
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
-            except IntegrityError:
-                return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_200_OK)
+            elif request.method == 'PUT':
+                Players.objects.filter(first_name=first_name, last_name=last_name, nationality=nationality).update(position=position, age=age, team_name=team, minutes_played=minutes, yellow_cards=yellow, red_cards=red, goals=goals, assists=assists, clean_sheets=c_sheets, total_apps=apps, game_starts=starts, sub_apps=sub_apps, updated_at=timezone.now())
+        except IntegrityError:
+            return Response(data={serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def get_teams(request):
