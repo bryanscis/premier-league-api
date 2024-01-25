@@ -15,16 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from premier_league_api import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("add-managers/", views.add_managers),
-    path("add-fixtures/", views.add_fixtures),
-    path("add-players/", views.add_players),
-    path("teams/", views.get_teams),
-    path("managers/", views.get_managers),
-    path("fixtures/", views.get_fixtures),
-    path("players/", views.get_players)
+    path('api/', include([
+        path("add-managers/", views.add_managers),
+        path("add-fixtures/", views.add_fixtures),
+        path("add-players/", views.add_players),
+        path("teams/", views.get_teams),
+        path("managers/", views.get_managers),
+        path("fixtures/", views.get_fixtures),
+        path("players/", views.get_players),
+    ])),
 ]
