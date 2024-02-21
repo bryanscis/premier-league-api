@@ -30,5 +30,9 @@ urlpatterns = [
         path("managers/", views.get_managers),
         path("fixtures/", views.get_fixtures),
         path("players/", views.get_players),
+        path("delete-team/<str:abb>/", views.delete_team),
+        path("delete-manager/<int:id>/", views.delete_manager),
+        path("delete-fixture/<int:id>/", views.delete_fixture),
+        path("delete-player/<int:id>/", views.delete_player),
     ])),
 ]

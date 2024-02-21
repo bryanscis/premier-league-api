@@ -165,3 +165,51 @@ def get_players(request):
             return JsonResponse({'players': serializer.data}, status=200)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_team(request, abb):
+
+    if request.method == 'DELETE':
+        try:
+            team = Teams.objects.get(abb=abb)
+            team.delete()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_manager(request, id):
+
+    if request.method == 'DELETE':
+        try:
+            manager = Managers.objects.get(id=id)
+            manager.delete()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_fixture(request, id):
+
+    if request.method == 'DELETE':
+        try:
+            fixture = Fixtures.objects.get(id=id)
+            fixture.delete()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_player(request, id):
+
+    if request.method == 'DELETE':
+        try:
+            player = Players.objects.get(id=id)
+            player.delete()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
