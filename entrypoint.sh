@@ -1,2 +1,3 @@
 python3 manage.py migrate
-python3 manage.py collectstatic
+
+gunicorn premier_league_api.wsgi --bind 0.0.0.0:8000

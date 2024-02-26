@@ -1,6 +1,8 @@
 services:
-  server:
+  premier_league_api:
     build:
-      context: .
+        context: .
+    env_file:
+      - .env
     ports:
-      - 8000:8000
+      - "8000:8000"
