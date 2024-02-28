@@ -6,3 +6,9 @@ services:
       - .env
     ports:
       - "8000:8000"
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - premier_league_api
